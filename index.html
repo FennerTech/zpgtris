@@ -1,0 +1,830 @@
+<!-- -----------------------------------------------
+ZPG-Tris v1.39
+(c) 2024 Marco Fenner
+
+Urheberrechtlich geschützt.
+Kopieren erlaubt.
+Verändern nur mit Namensnennung des Autors ;-)
+Danke und Viel Spaß!
+------------------------------------------------ -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZPG-tris v1.39</title>
+ <meta name="description" content="ZPG-tris ist ein Langzeit-Idle-Browsergame, entwickelt von Marco Fenner. Es spielt sich praktisch von selbst! :-)">
+    <meta name="keywords" content="Idle Game, Browsergame, ZPG-tris, ZPG, Zahlen erhöhen, HTML5 Spiel, Marco Fenner, Fennertech, Zero-Player-Game">
+    <meta name="author" content="Marco Fenner">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="ZPG-tris - Das spielerlose Tetris">
+    <meta property="og:description" content="Spiele ZPG-tris, das ZPG-Browsergame von Marco Fenner.">
+    <meta property="og:url" content="https://fennertech.github.io/zpgtris/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="ZPG-tris - Das ZPG-Browsergame">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Leerlauf - Das Idle-Browsergame">
+    <meta property="twitter:description" content="Spiele ZPG-tris, das ZPG-Browsergame von Marco Fenner.">
+    <meta property="twitter:url" content="https://fennertech.github.io/zpgtris/">
+    <style>
+        body {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            overflow: hidden; /* Verhindert Scrollen, bevor Cookies akzeptiert werden */
+        }
+        h1 {
+            font-size: 2em;
+            color: #90ee90; /* Hellgrün */
+        }
+        h2 {
+            font-size: 1em; /* Zwei Schriftgrößen kleiner */
+            margin-top: 0;
+            color: white;
+        }
+        h2 a {
+            color: #add8e6; /* Hellblau für den E-Mail-Link */
+            text-decoration: none;
+        }
+        #gameContainer {
+            position: relative;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        canvas {
+            background-color: #000;
+            display: block;
+            border: 1px solid #fff;
+        }
+        #stars {
+            font-size: 24px;
+            color: #add8e6; /* Hellblau für die Sterne */
+            margin: 10px 0;
+        }
+        #score {
+            font-size: 27px; /* Schriftgröße um 3 Größen erhöht */
+            margin-top: 20px; /* Abstand zwischen Spielfeld und Punkte-Zeile erhöht */
+            color: yellow; /* Schriftfarbe auf gelb gesetzt */
+        }
+        #score span {
+            color: #d3d3d3; /* Hellgrau für Klammern und verbleibende Punkte */
+            font-size: 0.7em; /* Klammern und verbleibende Punkte um 2 Schriftgrößen verkleinert */
+        }
+        #level {
+            font-size: 23px; /* Schriftgröße um 3 Größen erhöht */
+            margin-top: 5px;
+        }
+        #level span {
+            color: #add8e6; /* Hellblau für die Zahl des Levels */
+        }
+        #gameOverCount {
+            font-size: 20px;
+            margin-top: 5px;
+        }
+        #nextStar {
+            font-size: 18px; /* Hinweis für die verbleibenden Punkte bis zum nächsten Stern */
+            margin-top: 5px;
+            color: #d3d3d3;
+        }
+        .buttonContainer {
+            position: absolute;
+            right: -100px; /* Abstand zum Spielfeld erhöht */
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            top: 0;
+        }
+        #resetButton, #impressumButton {
+            padding: 5px 10px;
+            font-size: 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        #resetButton {
+            background-color: red;
+            color: white;
+        }
+        #impressumButton {
+            background-color: #808080; /* Standard-Grau */
+            color: white;
+        }
+        #modal, #impressumModal {
+            display: none; /* Modal-Fenster sind standardmäßig unsichtbar */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        #modalContent, #impressumModalContent {
+            background-color: #333;
+            padding: 20px;
+            border: 1px solid #888;
+        }
+        #modalContent {
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+        }
+        #impressumModalContent {
+        width: 75%;
+        height: 75%;
+        max-width: 75%;
+        max-height: 75%;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        padding: 20px;
+        overflow: hidden; /* Verhindert Scrollen des gesamten Inhalts */
+    }
+        }
+        .modalButton {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .confirmButton {
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        .cancelButton {
+            background-color: gray;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        #closeImpressum {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 20px;
+        background-color: transparent;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+    	#impressumText {
+        width: 100%;
+        height: calc(100% - 60px); /* Abzüglich der Höhe von Überschrift und Schließen-Button */
+        overflow-y: auto; /* Fügt einen vertikalen Scrollbalken hinzu, wenn der Inhalt zu lang ist */
+        text-align: left; /* Linksbündige Textausrichtung */
+        padding-right: 15px; /* Platz für den Scrollbalken */
+    }
+    
+        #visitorCounter {
+            margin-top: 30px; /* Abstand zur Game-Over-Zeile erhöht */
+        }
+        #visitorCounter table {
+            margin: 0 auto;
+            border-collapse: collapse;
+            color: white;
+            font-size: 0.9em; /* Schriftgröße des Tabelleninhalts verkleinert */
+        }
+        #visitorCounter td {
+            padding: 5px 10px;
+        }
+        #visitorCounter td:first-child {
+            text-align: left; /* Linksbündige Ausrichtung der ersten Spalte */
+        }
+        #visitorCounter td:last-child {
+            text-align: right; /* Rechtsbündige Ausrichtung der zweiten Spalte */
+        }
+        #cookieBanner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #444;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            // z-index: 9999;
+            display: none; /* Standardmäßig ausgeblendet */
+        }
+        #cookieBanner button {
+            margin-left: 10px;
+            padding: 5px 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+        #acceptCookies {
+            background-color: green;
+            color: white;
+        }
+        #declineCookies {
+            background-color: red;
+            color: white;
+        }
+        #cookieDeclinedMessage {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            border: 1px solid #888;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="cookieBanner">
+        <span>Diese Website verwendet Cookies, um sicherzustellen, dass Sie die beste Erfahrung auf unserer Website erhalten.</span>
+        <button id="acceptCookies">Annehmen</button>
+        <button id="declineCookies">Ablehnen</button>
+    </div>
+
+    <div id="cookieDeclinedMessage">
+        <p>Sie haben die Verwendung von Cookies abgelehnt. Möchten Sie es sich noch einmal überlegen?</p>
+        <button id="retryCookies">Doch annehmen</button>
+    </div>
+
+    <div id="mainContent"> <!-- Hauptinhalt -->
+        <h1>ZPG-Tris v1.39</h1>
+        <h2>Ein Zero-Player-Game vom <a href="mailto:datenschrauber@posteo.de">Datenschrauber</a></h2>
+        <div id="gameContainer">
+            <canvas id="gameCanvas" width="200" height="400"></canvas>
+            <div class="buttonContainer">
+                <button id="resetButton">Reset</button>
+                <button id="impressumButton">Impressum</button>
+            </div>
+        </div>
+        <div id="stars"></div> <!-- Hier werden die Sterne angezeigt -->
+        <div id="score">2.152<span> (158)</span></div> <!-- Punkteanzeige -->
+        <div id="level">Level: <span>21</span></div> <!-- Levelanzeige -->
+        <div id="gameOverCount">Game Over: 0</div>
+        <div id="nextStar">Noch 158 !</div> <!-- Hinweis für die Punkte bis zum nächsten Stern -->
+
+        <!-- Besucherzähler Tabelle -->
+        <div id="visitorCounter">
+            <table>
+                <tr>
+                    <td>Aktuell online:</td>
+                    <td><span class="BZonline"></span></td>
+                </tr>
+                <tr>
+                    <td>Besucher heute:</td>
+                    <td><span class="BZheute"></span></td>
+                </tr>
+                <tr>
+                    <td>Besucher gestern:</td>
+                    <td><span class="BZgestern"></span></td>
+                </tr>
+                <tr>
+                    <td>Besucher gesamt:</td>
+                    <td><span class="BZgesamt"></span></td>
+                </tr>
+                <tr>
+                    <td>Besucher seit:</td>
+                    <td><span class="BZseit"></span></td>
+                </tr>
+            </table>
+        </div>
+        <!-- Besucherzähler Script -->
+        <script language="JavaScript" src="https://www.besucherzaehler-kostenlos.de/js/counter.js.php?count=1&id=fennertech.github.iozpgtris&start=0&design=6"></script>
+
+        <div id="modal">
+            <div id="modalContent">
+                <p>Willst du wirklich den Spielstand zurücksetzen?</p>
+                <button id="confirmReset" class="modalButton confirmButton">Ja</button>
+                <button id="cancelReset" class="modalButton cancelButton">Nein</button>
+            </div>
+        </div>
+
+        <div id="impressumModal">
+            <div id="impressumModalContent">
+                <button id="closeImpressum">X</button>
+                <h2>Impressum</h2>
+                <div id="impressumText">
+                <p><strong>Angaben gemäß § 5 TMG</strong></p>
+        <p><strong>Betreiber der Website:</strong><br> Marco Fenner<br> Wiardastraße 19<br> 26603 Aurich<br> Deutschland</p>
+        <p><strong>Kontakt:</strong><br> E-Mail: <a href="mailto:datenschrauber@posteo.de">datenschrauber@posteo.de</a><br> Telefon: +49 1573 004 2105</p>
+        <p><strong>Vielen Dank für den Besuch meiner Website.<br>Wenn Sie Ihnen gefallen hat, würde ich mich über eine kurze Nachricht sehr freuen.</strong> 😊</p>
+
+        <h3>Haftungsausschluss:</h3>
+        <p><strong>Haftung für Inhalte</strong><br> Als Diensteanbieter bin ich gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG bin ich als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen. Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen Gesetzen bleiben hiervon unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung möglich. Bei Bekanntwerden von entsprechenden Rechtsverletzungen werde ich diese Inhalte umgehend entfernen.</p>
+
+        <p><strong>Haftung für Links</strong><br> Mein Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte ich keinen Einfluss habe. Deshalb kann ich für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich. Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße überprüft. Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar. Eine permanente inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konkrete Anhaltspunkte einer Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen werde ich derartige Links umgehend entfernen.</p>
+
+        <p><strong>Urheberrecht</strong><br> Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers. Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch gestattet. Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet. Insbesondere werden Inhalte Dritter als solche gekennzeichnet. Sollten Sie trotzdem auf eine Urheberrechtsverletzung aufmerksam werden, bitte ich um einen entsprechenden Hinweis. Bei Bekanntwerden von Rechtsverletzungen werde ich diese Inhalte umgehend entfernen.</p>
+
+        <h3>Datenschutz:</h3>
+        <p>Die Nutzung meiner Webseite ist in der Regel ohne Angabe personenbezogener Daten möglich. Soweit auf meinen Seiten personenbezogene Daten (beispielsweise Name, Anschrift oder E-Mail-Adressen) erhoben werden, erfolgt dies, soweit möglich, stets auf freiwilliger Basis. Diese Daten werden ohne Ihre ausdrückliche Zustimmung nicht an Dritte weitergegeben. Ich weise darauf hin, dass die Datenübertragung im Internet (z.B. bei der Kommunikation per E-Mail) Sicherheitslücken aufweisen kann. Ein lückenloser Schutz der Daten vor dem Zugriff durch Dritte ist nicht möglich.</p>
+
+        <h3>Besucherzähler von besucherzaehler-kostenlos.de</h3>
+
+        <p>Diese Webseite verwendet einen externen Zähler, um die Anzahl der Webseitenaufrufe zu erfassen. Dafür wird ein Java-Script von einer externe Webseite geladen. Der Server von <a href="https://www.besucherzaehler-kostenlos.de">besucherzaehler-kostenlos.de</a> speichert die IP-Adresse des Zugriffs anonymisiert und zeitlich begrenzt in einer LOG-Datei ab. Diese wird regelmäßig unwiderruflich gelöscht.</p>
+
+        <p>Um die korrekte Funktionsweise des Zählers zu gewährleisten, speichert der Besucherzähler zudem einen sogenannten Session-Cookie auf dem Computer des Besuchers ab. Dieser wird in der Regel vom Browser gelöscht, sobald er geschlossen wird. In diesem Cookie werden keine persönlichen Informationen gespeichert. Er enthält lediglich die Information der aufgerufenen Domain, sowie einen boolschen Tag (true/false), um den Besucher als bereits gezählt zu markieren.</p>
+
+        <p>Es werden auch darüberhinaus keine persönlichen oder personenbezogenen Daten vom Besucherzähler erhoben. Eine Nachverfolgung oder Zuordnung der Zugriffe ist zu keiner Zeit möglich. Ein besonderer Dank geht an <a href="https://www.howtodocentral.com">www.howtodocentral.com</a>, durch dessen Unterstützung dieser kostenlose Service erst möglich gemacht wird.</p>
+
+        <h3>Einsehbarkeit des Quellcodes:</h3>
+        <p>Der Quellcode dieser Seite ist vollständig für jedermann einsehbar.</p>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Spielvariablen
+        let gameInterval; // Deklaration nach oben verschoben
+
+        // Cookie-Hinweis Logik
+        const cookieBanner = document.getElementById('cookieBanner');
+        const acceptCookies = document.getElementById('acceptCookies');
+        const declineCookies = document.getElementById('declineCookies');
+        const retryCookies = document.getElementById('retryCookies');
+        const cookieDeclinedMessage = document.getElementById('cookieDeclinedMessage');
+        const mainContent = document.getElementById('mainContent');
+
+        // Überprüfen, ob der User Cookies bereits akzeptiert hat
+        if (!localStorage.getItem('cookiesAccepted')) {
+            cookieBanner.style.display = 'block'; // Zeige das Cookie-Hinweis-Banner
+            document.body.style.overflow = 'hidden'; // Verhindere Scrollen
+            if (gameInterval) {
+                clearInterval(gameInterval); // Pausiere das Spiel bis Cookies akzeptiert wurden
+            }
+        } else {
+            mainContent.style.display = 'block'; // Zeige den Hauptinhalt der Website
+        }
+
+        acceptCookies.addEventListener('click', () => {
+            localStorage.setItem('cookiesAccepted', 'true');
+            cookieBanner.style.display = 'none';
+            document.body.style.overflow = ''; // Scrollen erlauben
+            mainContent.style.display = 'block'; // Zeige den Hauptinhalt der Website
+            startGame(); // Startet das Spiel, wenn Cookies akzeptiert werden
+        });
+
+        declineCookies.addEventListener('click', () => {
+            mainContent.style.display = 'none'; // Verstecke den Hauptinhalt der Website
+            cookieBanner.style.display = 'none';
+            cookieDeclinedMessage.style.display = 'block'; // Zeige den Ablehnungs-Hinweis
+        });
+
+        retryCookies.addEventListener('click', () => {
+            localStorage.setItem('cookiesAccepted', 'true');
+            cookieDeclinedMessage.style.display = 'none';
+            document.body.style.overflow = ''; // Scrollen erlauben
+            mainContent.style.display = 'block'; // Zeige den Hauptinhalt der Website
+            startGame(); // Startet das Spiel, wenn Cookies angenommen werden
+        });
+
+        // Logik für Reset und Impressum-Buttons
+        const resetButton = document.getElementById('resetButton');
+        const modal = document.getElementById('modal');
+        const confirmReset = document.getElementById('confirmReset');
+        const cancelReset = document.getElementById('cancelReset');
+
+        resetButton.addEventListener('click', () => {
+            modal.style.display = 'flex'; // Modal anzeigen
+        });
+
+        confirmReset.addEventListener('click', () => {
+            modal.style.display = 'none';
+            resetGame();
+        });
+
+        cancelReset.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        const impressumButton = document.getElementById('impressumButton');
+        const impressumModal = document.getElementById('impressumModal');
+        const closeImpressum = document.getElementById('closeImpressum');
+
+        impressumButton.addEventListener('click', () => {
+            impressumModal.style.display = 'flex'; // Modal anzeigen
+        });
+
+        closeImpressum.addEventListener('click', () => {
+            impressumModal.style.display = 'none';
+        });
+
+        // Weitere Spielvariablen
+        const canvas = document.getElementById('gameCanvas');
+        const context = canvas.getContext('2d');
+        const gridSize = 20;
+        const columns = canvas.width / gridSize;
+        const rows = canvas.height / gridSize;
+
+        let grid = Array.from({ length: rows }, () => Array(columns).fill(0));
+
+        const shapes = [
+            [[1, 1, 1, 1]], // I
+            [[1, 1], [1, 1]], // O
+            [[0, 1, 0], [1, 1, 1]], // T
+            [[1, 0, 0], [1, 1, 1]], // J
+            [[0, 0, 1], [1, 1, 1]], // L
+            [[1, 1, 0], [0, 1, 1]], // S
+            [[0, 1, 1], [1, 1, 0]]  // Z
+        ];
+
+        const colors = ['cyan', 'yellow', 'purple', 'blue', 'orange', 'green', 'red'];
+
+        let currentPiece = null;
+        let currentColor = null;
+        let currentX = 0;
+        let currentY = 0;
+        let score = 0;
+        let level = 1;
+        let levelRequirement = 10;
+        let gameOverCount = 0;
+        let fallSpeed = 1600; // 25% langsamer
+        let isPaused = false;
+
+        // Stern-Verteilungsstufen
+        const starThresholds = [10000, 25000, 50000, 100000, 150000, 200000, 250000, 300000];
+        let stars = 0;
+
+        function resetGame() {
+            clearInterval(gameInterval);
+            grid = Array.from({ length: rows }, () => Array(columns).fill(0));
+            score = 0;
+            level = 1;
+            levelRequirement = 10;
+            gameOverCount = 0;
+            stars = 0;
+            updateScore();
+            updateLevel();
+            updateGameOverCount();
+            updateStars();
+            startGame();
+        }
+
+        function startGame() {
+            spawnPiece();
+            gameInterval = setInterval(gameLoop, fallSpeed / rows); // Gleichmäßige Bewegung pro Zeile
+        }
+
+        function spawnPiece() {
+            const index = Math.floor(Math.random() * shapes.length);
+            currentPiece = shapes[index];
+            currentColor = colors[index];
+            currentX = Math.floor(columns / 2) - Math.floor(currentPiece[0].length / 2);
+            currentY = 0;
+
+            const bestPosition = findBestPosition();
+            if (bestPosition) {
+                moveToBestPosition(bestPosition);
+            }
+        }
+
+        function findBestPosition() {
+            let bestScore = -Infinity;
+            let bestX = currentX;
+            let bestRotationIndex = 0;
+
+            for (let i = 0; i < 4; i++) {
+                const rotatedPiece = rotatePiece(currentPiece, i);
+                for (let x = 0; x <= columns - rotatedPiece[0].length; x++) {
+                    let y = 0;
+                    while (!collision(x, y + 1, rotatedPiece)) {
+                        y++;
+                    }
+                    const score = evaluatePosition(x, y, rotatedPiece);
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestX = x;
+                        bestRotationIndex = i;
+                    }
+                }
+            }
+
+            return { x: bestX, rotationIndex: bestRotationIndex };
+        }
+
+        function rotatePiece(piece, rotations) {
+            let rotatedPiece = piece;
+            for (let r = 0; r < rotations; r++) {
+                rotatedPiece = rotatedPiece[0].map((_, index) =>
+                    rotatedPiece.map(row => row[index]).reverse()
+                );
+            }
+            return rotatedPiece;
+        }
+
+        function evaluatePosition(x, y, piece) {
+            let score = 0;
+            let linesCleared = 0;
+
+            const tempGrid = grid.map(row => row.slice());
+            for (let r = 0; r < piece.length; r++) {
+                for (let c = 0; c < piece[r].length; c++) {
+                    if (piece[r][c]) {
+                        tempGrid[y + r][x + c] = 1;
+                    }
+                }
+            }
+
+            for (let r = 0; r < rows; r++) {
+                if (tempGrid[r].every(cell => cell !== 0)) {
+                    linesCleared++;
+                }
+            }
+
+            const aggregateHeight = tempGrid.reduce((sum, row, rowIndex) =>
+                sum + row.reduce((acc, cell) => acc + (cell ? rows - rowIndex : 0), 0), 0);
+
+            const holes = tempGrid.reduce((sum, row, rowIndex) => 
+                sum + row.reduce((acc, cell, colIndex) =>
+                    acc + (!cell && rowIndex < rows - 1 && tempGrid[rowIndex + 1][colIndex] ? 1 : 0), 0), 0);
+
+            const bumpiness = tempGrid[0].reduce((sum, _, colIndex) => 
+                sum + Math.abs((tempGrid.findIndex(row => row[colIndex]) || 0) - (tempGrid.findIndex(row => row[colIndex + 1]) || 0)), 0);
+
+            score = (linesCleared * 10) - (holes * 2) - bumpiness - aggregateHeight;
+
+            return score;
+        }
+
+        function moveToBestPosition(bestPosition) {
+            currentX = bestPosition.x;
+            for (let i = 0; i < bestPosition.rotationIndex; i++) {
+                currentPiece = rotatePiece(currentPiece, 1);
+            }
+        }
+
+        function movePieceDown() {
+            if (!collision(currentX, currentY + 1)) {
+                currentY++;
+            } else {
+                lockPiece();
+                clearLines();
+                if (currentY <= 0) {
+                    resetGrid(); // Spielfeld löschen und weitermachen
+                    gameOverCount++;
+                    updateGameOverCount();
+                }
+                spawnPiece();
+            }
+        }
+
+        function movePieceLeft() {
+            if (!collision(currentX - 1, currentY)) {
+                currentX--;
+            }
+        }
+
+        function movePieceRight() {
+            if (!collision(currentX + 1, currentY)) {
+                currentX++;
+            }
+        }
+
+        function pausePiece() {
+            if (!isPaused) {
+                clearInterval(gameInterval);
+                isPaused = true;
+            }
+        }
+
+        function unpausePiece() {
+            if (isPaused) {
+                gameInterval = setInterval(gameLoop, fallSpeed / rows);
+                isPaused = false;
+            }
+        }
+
+        function dropPieceAndRemove() {
+            // Der Stein fällt sofort nach unten und entfernt alle Steine unter sich
+            while (currentY < rows - currentPiece.length) {
+                currentY++; // Der Stein bewegt sich nach unten
+            }
+
+            // Entfernen der gesamten Spalten, die von der Breite des Steins abgedeckt werden
+            for (let c = currentX; c < currentX + currentPiece[0].length; c++) {
+                for (let r = 0; r < rows; r++) {
+                    grid[r][c] = 0;
+                }
+            }
+
+            drawGrid(); // Aktualisieren des Grids, um den Effekt des Löschens zu sehen
+
+            setTimeout(() => {
+                // Der Stein löst sich nach Erreichen des Bodens auf
+                spawnPiece(); // Erzeuge einen neuen Stein
+            }, 100); // Eine kurze Verzögerung, um den Auflöseffekt sichtbar zu machen
+        }
+
+        function collision(x, y, piece = currentPiece) {
+            for (let r = 0; r < piece.length; r++) {
+                for (let c = 0; c < piece[r].length; c++) {
+                    if (piece[r][c] && (grid[y + r] && grid[y + r][x + c]) !== 0) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function lockPiece() {
+            for (let r = 0; r < currentPiece.length; r++) {
+                for (let c = 0; c < currentPiece[r].length; c++) {
+                    if (currentPiece[r][c]) {
+                        grid[currentY + r][currentX + c] = currentColor;
+                    }
+                }
+            }
+        }
+
+        function clearLines() {
+            let linesCleared = 0;
+            for (let r = rows - 1; r >= 0; r--) {
+                if (grid[r].every(cell => cell !== 0)) {
+                    grid.splice(r, 1);
+                    grid.unshift(Array(columns).fill(0));
+                    linesCleared++;
+                }
+            }
+            score += linesCleared;
+            updateScore();
+            checkForNewStars(); // Überprüfen, ob ein neuer Stern vergeben werden sollte
+            if (linesCleared > 0) {
+                if (score >= levelRequirement) {
+                    level++;
+                    levelRequirement += level * 10; // Erhöht die Anforderungen pro Level
+                    updateLevel();
+                }
+            }
+        }
+
+        function resetGrid() {
+            grid = Array.from({ length: rows }, () => Array(columns).fill(0));
+        }
+
+        function updateScore() {
+            document.getElementById('score').innerHTML = `${score.toLocaleString('de-DE')}<span> (${(levelRequirement - score).toLocaleString('de-DE')})</span>`;
+        }
+
+        function updateLevel() {
+            document.getElementById('level').innerHTML = `Level: <span>${level}</span>`;
+        }
+
+        function updateGameOverCount() {
+            document.getElementById('gameOverCount').innerText = `Game Over: ${gameOverCount}`;
+        }
+
+        function checkForNewStars() {
+            while (stars < starThresholds.length && score >= starThresholds[stars]) {
+                stars++;
+                updateStars();
+            }
+            updateNextStarInfo();
+        }
+
+        function updateStars() {
+            let starsHTML = '';
+            for (let i = 0; i < stars; i++) {
+                starsHTML += '&#9733;'; // Unicode für einen gefüllten Stern
+            }
+            document.getElementById('stars').innerHTML = starsHTML;
+        }
+
+        function updateNextStarInfo() {
+            if (stars < starThresholds.length) {
+                const pointsToNextStar = starThresholds[stars] - score;
+                document.getElementById('nextStar').innerText = `Noch ${pointsToNextStar.toLocaleString('de-DE')}!`;
+            } else {
+                const lastThreshold = starThresholds[starThresholds.length - 1];
+                const nextThreshold = lastThreshold + (lastThreshold - starThresholds[starThresholds.length - 2]);
+                const pointsToNextStar = nextThreshold - score;
+                document.getElementById('nextStar').innerText = `Noch ${pointsToNextStar.toLocaleString('de-DE')}!`;
+            }
+        }
+
+        function saveGame() {
+            const gameState = {
+                grid,
+                score,
+                level,
+                levelRequirement,
+                gameOverCount,
+                stars,
+                time: Date.now() // Zeitstempel speichern
+            };
+            localStorage.setItem('tetrisGame', JSON.stringify(gameState));
+        }
+
+        function loadGame() {
+            const savedGame = JSON.parse(localStorage.getItem('tetrisGame'));
+            if (savedGame) {
+                grid = savedGame.grid;
+                score = savedGame.score;
+                level = savedGame.level;
+                levelRequirement = savedGame.levelRequirement;
+                gameOverCount = savedGame.gameOverCount;
+                stars = savedGame.stars;
+
+                // Fortschritt simulieren basierend auf der verstrichenen Zeit
+                const timeDifference = Math.floor((Date.now() - savedGame.time) / 1000);
+                simulateProgress(timeDifference);
+                updateScore();
+                updateLevel();
+                updateGameOverCount();
+                updateStars();
+                updateNextStarInfo();
+            }
+        }
+
+        function simulateProgress(secondsElapsed) {
+            const pointsPerSecond = 1; 
+            score += pointsPerSecond * secondsElapsed;
+
+            while (score >= levelRequirement) {
+                level++;
+                levelRequirement += level * 10;
+            }
+
+            checkForNewStars();
+        }
+
+        function drawGrid() {
+            context.clearRect(0, 0, canvas.width, canvas.height); // Canvas leeren
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < columns; c++) {
+                    if (grid[r][c]) {
+                        context.fillStyle = grid[r][c];
+                        context.fillRect(c * gridSize, r * gridSize, gridSize - 1, gridSize - 1);
+                    }
+                }
+            }
+        }
+
+        function drawPiece() {
+            context.fillStyle = currentColor;
+            for (let r = 0; r < currentPiece.length; r++) {
+                for (let c = 0; c < currentPiece[r].length; c++) {
+                    if (currentPiece[r][c]) {
+                        context.fillRect((currentX + c) * gridSize, (currentY + r) * gridSize, gridSize - 1, gridSize - 1);
+                    }
+                }
+            }
+        }
+
+        function gameLoop() {
+            if (!isPaused) {
+                movePieceDown();
+                drawGrid();
+                drawPiece(); 
+            }
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                saveGame(); // Spielstatus speichern, wenn der Tab in den Hintergrund geht
+                clearInterval(gameInterval); // Spiel pausieren
+            } else if (document.visibilityState === 'visible') {
+                loadGame(); // Spielstatus laden und fortsetzen
+                startGame(); // Spiel fortsetzen
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            switch (event.key) {
+                case 'ArrowLeft':
+                    movePieceLeft();
+                    break;
+                case 'ArrowRight':
+                    movePieceRight();
+                    break;
+                case 'ArrowUp':
+                    pausePiece();
+                    break;
+                case 'ArrowDown':
+                    dropPieceAndRemove(); // Der Stein fällt sofort und entfernt alle Steine darunter bis zum Boden und löst sich auf
+                    break;
+            }
+        });
+
+        document.addEventListener('keyup', (event) => {
+            if (event.key === 'ArrowUp') {
+                unpausePiece();
+            }
+        });
+
+        loadGame();
+        if (localStorage.getItem('cookiesAccepted')) {
+            startGame();
+        }
+
+    </script>
+</body>
+</html>
+
