@@ -1,5 +1,5 @@
 <!-- -----------------------------------------------
-ZPG-Tris v1.39
+ZPG-Tris v1.40
 (c) 2024 Marco Fenner
 
 Urheberrechtlich geschützt.
@@ -12,7 +12,7 @@ Danke und Viel Spaß!
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZPG-tris v1.39</title>
+    <title>ZPG-tris v1.40</title>
  <meta name="description" content="ZPG-tris ist ein Langzeit-Idle-Browsergame, entwickelt von Marco Fenner. Es spielt sich praktisch von selbst! :-)">
     <meta name="keywords" content="Idle Game, Browsergame, ZPG-tris, ZPG, Zahlen erhöhen, HTML5 Spiel, Marco Fenner, Fennertech, Zero-Player-Game">
     <meta name="author" content="Marco Fenner">
@@ -255,7 +255,7 @@ Danke und Viel Spaß!
     </div>
 
     <div id="mainContent"> <!-- Hauptinhalt -->
-        <h1>ZPG-Tris v1.39</h1>
+        <h1>ZPG-Tris v1.40</h1>
         <h2>Ein Zero-Player-Game vom <a href="mailto:datenschrauber@posteo.de">Datenschrauber</a></h2>
         <div id="gameContainer">
             <canvas id="gameCanvas" width="200" height="400"></canvas>
@@ -356,34 +356,34 @@ Danke und Viel Spaß!
         // Überprüfen, ob der User Cookies bereits akzeptiert hat
         if (!localStorage.getItem('cookiesAccepted')) {
             cookieBanner.style.display = 'block'; // Zeige das Cookie-Hinweis-Banner
-            document.body.style.overflow = 'hidden'; // Verhindere Scrollen
+            document.body.style.overflow = 'hidden'; 
             if (gameInterval) {
-                clearInterval(gameInterval); // Pausiere das Spiel bis Cookies akzeptiert wurden
+                clearInterval(gameInterval); 
             }
         } else {
-            mainContent.style.display = 'block'; // Zeige den Hauptinhalt der Website
+            mainContent.style.display = 'block'; 
         }
 
         acceptCookies.addEventListener('click', () => {
             localStorage.setItem('cookiesAccepted', 'true');
             cookieBanner.style.display = 'none';
-            document.body.style.overflow = ''; // Scrollen erlauben
-            mainContent.style.display = 'block'; // Zeige den Hauptinhalt der Website
-            startGame(); // Startet das Spiel, wenn Cookies akzeptiert werden
+            document.body.style.overflow = ''; 
+            mainContent.style.display = 'block'; 
+            startGame(); 
         });
 
         declineCookies.addEventListener('click', () => {
-            mainContent.style.display = 'none'; // Verstecke den Hauptinhalt der Website
+            mainContent.style.display = 'none'; 
             cookieBanner.style.display = 'none';
-            cookieDeclinedMessage.style.display = 'block'; // Zeige den Ablehnungs-Hinweis
+            cookieDeclinedMessage.style.display = 'block'; 
         });
 
         retryCookies.addEventListener('click', () => {
             localStorage.setItem('cookiesAccepted', 'true');
             cookieDeclinedMessage.style.display = 'none';
-            document.body.style.overflow = ''; // Scrollen erlauben
-            mainContent.style.display = 'block'; // Zeige den Hauptinhalt der Website
-            startGame(); // Startet das Spiel, wenn Cookies angenommen werden
+            document.body.style.overflow = ''; 
+            mainContent.style.display = 'block'; 
+            startGame(); 
         });
 
         // Logik für Reset und Impressum-Buttons
@@ -450,7 +450,7 @@ Danke und Viel Spaß!
         let isPaused = false;
 
         // Stern-Verteilungsstufen
-        const starThresholds = [10000, 25000, 50000, 100000, 150000, 200000, 250000, 300000];
+        const starThresholds = [100000, 250000, 500000, 1000000, 1500000, 2000000, 2500000, 3000000, 5000000, 10000000, 15000000, 20000000, 25000000, 50000000, 100000000, 200000000, 500000000, 1000000000, 1000000000000, 10000000000000000000];
         let stars = 0;
 
         function resetGame() {
@@ -827,4 +827,3 @@ Danke und Viel Spaß!
     </script>
 </body>
 </html>
-
